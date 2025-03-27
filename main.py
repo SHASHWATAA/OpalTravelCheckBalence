@@ -247,6 +247,17 @@ def build_table_string(daily_totals: dict) -> str:
 
 
 def main():
+
+    healthcheck_url = f"https://hc-ping.com/{credentials.HEALTH_CHECK_IO_PING_KEY}/opal-balance"
+
+    try:
+        requests.get(healthcheck_url + "/start", timeout=5)
+    except requests.exceptions.RequestException:
+        # If the network request fails for any reason, we don't want
+        # it to prevent the main job from running
+        pass
+
+
     driver = initialize_driver()
     try:
         login(driver)
@@ -300,6 +311,8 @@ def main():
     finally:
         driver.quit()
 
+    # Signal success:
+    requests.get(healthcheck_url)
 
 if __name__ == "__main__":
     main()
